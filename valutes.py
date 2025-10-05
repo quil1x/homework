@@ -1,17 +1,41 @@
-exchange_rates = [
-    {"ccy":"EUR","base_ccy":"UAH","buy":"48.22000","sale":"49.01961"},
-    {"ccy":"USD","base_ccy":"UAH","buy":"41.10000","sale":"41.66667"}
-]
+import requests
 
-def stependia_valutes():
-    stependia = float(input("Ваша стипендія?: "))
-    valutes = input("В яку валюту перевести? Приклад: USD, EUR: ")
 
-    if valutes == "EUR" or valutes == "USD":
-        for x in exchange_rates:
-            if x["ccy"] == valutes:
-                print("Ваша стипендія у", valutes, "=", round(stependia / float(x["buy"]), 2))
-    else:
-        print("Неправильна валюта")
+print("--- Конвертер стипендії ---")
 
-stependia_valutes()
+url_privat = "https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5"
+exchange_rates = requests.get(url_privat).json()
+
+stependia_str = input("Ваша стипендія в UAH?: ")
+valuta = input("В яку валюту перевести? (USD або EUR): ").upper()
+
+stependia = float(stependia_str) 
+
+is_found = False
+for rate in exchange_rates:
+    if rate["ccy"] == valuta:
+        result = round(stependia / float(rate["buy"]), 2)
+        print(f"Ваша стипендія у {valuta} = {result}")
+        is_found = True
+        break
+
+if not is_found:
+    print("Таку валюту не знайдено. Доступні: USD, EUR.")
+
+
+
+print("\n--- Інформація про валюту країни ---")
+
+country_name = "Luxembourg"
+url_country = f"https://restcountries.com/v3.1/name/{country_name}"
+
+country_data_list = requests.get(url_country).json()
+
+country_info = country_data_list[0]
+name = country_info['name']['common']
+
+currencies_dict = country_info['currencies'] 
+currency_info = list(currencies_dict.values())[0]
+currency_name = currency_info['name']
+
+print(f"{name} - {currency_name}")
